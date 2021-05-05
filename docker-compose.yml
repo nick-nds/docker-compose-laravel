@@ -38,6 +38,20 @@ services:
     networks:
       - laravel
 
+  phpmyadmin:
+    depends_on:
+      - mysql
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: secret
+    networks:
+      - laravel
+
+
   php:
     build:
       context: .
