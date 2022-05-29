@@ -6,8 +6,8 @@ FROM nginx:stable-alpine
 RUN mkdir -p /etc/ssl/certs/
 RUN mkdir -p /etc/ssl/private/
 
-COPY ./ssl/unify.local+1.pem /etc/ssl/certs/nginx-selfsigned.crt
-COPY ./ssl/unify.local+1-key.pem /etc/ssl/private/nginx-selfsigned.key
+COPY ./ssl/bookland.local+1.pem /etc/ssl/certs/nginx-selfsigned.crt
+COPY ./ssl/bookland.local+1-key.pem /etc/ssl/private/nginx-selfsigned.key
 
 COPY ./ssl/self-signed.conf /etc/nginx/snippets/self-signed.conf
 COPY ./ssl/ssl-params.conf /etc/nginx/snippets/ssl-params.conf
