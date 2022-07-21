@@ -76,7 +76,7 @@ services:
     container_name: ${PROJECT}_composer
     volumes:
       - ./src:/var/www/html
-    working_dir: /var/www/html/{BRANCH}
+    working_dir: /var/www/html/${BRANCH}
     depends_on:
       - php
     user: laravel
@@ -89,7 +89,7 @@ services:
     container_name: ${PROJECT}_npm
     volumes:
       - ./src:/var/www/html
-    working_dir: /var/www/html/{BRANCH}
+    working_dir: /var/www/html/${BRANCH}
     entrypoint: ['npm']
     networks:
       - laravel
@@ -103,9 +103,9 @@ services:
       - ./src:/var/www/html:delegated
     depends_on:
       - mysql
-    working_dir: /var/www/html/{BRANCH}
+    working_dir: /var/www/html/${BRANCH}
     user: laravel
-    entrypoint: ['php', '/var/www/html/artisan']
+    entrypoint: ['php', '/var/www/html/${BRANCH}artisan']
     networks:
       - laravel
 

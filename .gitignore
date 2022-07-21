@@ -4,3 +4,4 @@ mysql
 /src
 /ssl/*.pem
 .env
+/tags
