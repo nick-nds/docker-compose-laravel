@@ -6,8 +6,8 @@ FROM nginx:stable-alpine
 RUN mkdir -p /etc/ssl/certs/
 RUN mkdir -p /etc/ssl/private/
 
-COPY ./ssl/bookland.local+1.pem /etc/ssl/certs/nginx-selfsigned.crt
-COPY ./ssl/bookland.local+1-key.pem /etc/ssl/private/nginx-selfsigned.key
+COPY ./ssl/wordlust.local+1.pem /etc/ssl/certs/nginx-selfsigned.crt
+COPY ./ssl/wordlust.local+1-key.pem /etc/ssl/private/nginx-selfsigned.key
 
 COPY ./ssl/self-signed.conf /etc/nginx/snippets/self-signed.conf
 COPY ./ssl/ssl-params.conf /etc/nginx/snippets/ssl-params.conf
@@ -20,6 +20,6 @@ COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 
 RUN mkdir -p /var/www/html
 
-RUN addgroup -g 1001 laravel && adduser -G laravel -g laravel -s /bin/sh -D laravel
+RUN addgroup -g 1000 laravel && adduser -G laravel -g laravel -s /bin/sh -D laravel
 
 RUN chown laravel:laravel /var/www/html

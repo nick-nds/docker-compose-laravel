@@ -1,5 +1,5 @@
 networks:
-  laravel:
+  wordlust:
 
 services:
   site:
@@ -8,7 +8,7 @@ services:
       dockerfile: nginx.dockerfile
     container_name: ${PROJECT}_nginx
     ports:
-      - 9009:443
+      - 9007:443
     volumes:
       - ./src:/var/www/html:delegated
     depends_on:
@@ -17,7 +17,7 @@ services:
       - mysql
       - mailhog
     networks:
-      - laravel
+      - wordlust
 
   mysql:
     image: mysql:latest
@@ -25,16 +25,18 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - 3309:3306
+      - 3307:3306
     environment:
-      MYSQL_DATABASE: laravel
+      MYSQL_DATABASE: wordlust
       MYSQL_USER: laravel
       MYSQL_PASSWORD: secret
       MYSQL_ROOT_PASSWORD: secret
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
+    volumes:
+      - apnithali_db:/var/lib/mysql
     networks:
-      - laravel
+      - wordlust
 
   phpmyadmin:
     depends_on:
@@ -42,12 +44,12 @@ services:
     image: phpmyadmin/phpmyadmin
     restart: always
     ports:
-      - 8089:80
+      - 8087:80
     environment:
       PMA_HOST: mysql
       MYSQL_ROOT_PASSWORD: secret
     networks:
-      - laravel
+      - wordlust
 
 
   php:
@@ -58,21 +60,21 @@ services:
     volumes:
       - ./src:/var/www/html:delegated
     networks:
-      - laravel
+      - wordlust
 
   redis:
     image: redis:alpine
     container_name: ${PROJECT}_redis
     restart: unless-stopped
     ports:
-      - 6371:6379
+      - 6377:6379
     networks:
-      - laravel
+      - wordlust
 
   composer:
     build:
       context: .
-      dockerfile: composer.dockerfile
+      dockerfile: php.dockerfile
     container_name: ${PROJECT}_composer
     volumes:
       - ./src:/var/www/html
@@ -80,19 +82,22 @@ services:
     depends_on:
       - php
     user: laravel
-    entrypoint: ['composer', '--ignore-platform-reqs']
+    entrypoint: ['php', '/var/www/html/$BRANCH/composer']
     networks:
-      - laravel
+      - wordlust
 
   npm:
-    image: node:latest
+    build:
+      context: .
+      dockerfile: node.dockerfile
     container_name: ${PROJECT}_npm
     volumes:
       - ./src:/var/www/html
     working_dir: /var/www/html/${BRANCH}
     entrypoint: ['npm']
+    user: node
     networks:
-      - laravel
+      - wordlust
 
   artisan:
     build:
@@ -105,15 +110,18 @@ services:
       - mysql
     working_dir: /var/www/html/${BRANCH}
     user: laravel
-    entrypoint: ['php', '/var/www/html/${BRANCH}artisan']
+    entrypoint: ['php', '/var/www/html/$BRANCH/artisan']
     networks:
-      - laravel
+      - wordlust
 
   mailhog:
     image: mailhog/mailhog:latest
     container_name: ${PROJECT}_mailhog
     ports:
-      - 1029:1025
-      - 8029:8025
+      - 1027:1025
+      - 8027:8025
     networks:
-      - laravel
+      - wordlust
+
+volumes:
+  wordlust_db:
