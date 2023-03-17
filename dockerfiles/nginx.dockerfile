@@ -18,8 +18,8 @@ ADD ./nginx/default.conf /etc/nginx/conf.d/
 RUN mkdir -p /etc/ssl/certs/
 RUN mkdir -p /etc/ssl/private/
 
-COPY ./ssl/test.local+4.pem /etc/ssl/certs/nginx-selfsigned.crt
-COPY ./ssl/test.local+4-key.pem /etc/ssl/private/nginx-selfsigned.key
+COPY ./ssl/crm.local+4.pem /etc/ssl/certs/nginx-selfsigned.crt
+COPY ./ssl/crm.local+4-key.pem /etc/ssl/private/nginx-selfsigned.key
 
 COPY ./ssl/self-signed.conf /etc/nginx/snippets/self-signed.conf
 COPY ./ssl/ssl-params.conf /etc/nginx/snippets/ssl-params.conf
