@@ -3,5 +3,6 @@ mysql
 .idea
 /src
 /dockerfiles/ssl/*.pem
+/dockerfiles/ssl/local-self-signed.conf
 .env
 /tags
