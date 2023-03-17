@@ -1,6 +1,5 @@
 networks:
   mynetwork:
-    external: true
     name: ${NETWORK}
 
 
