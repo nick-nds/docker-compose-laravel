@@ -2,8 +2,6 @@ networks:
   mynetwork:
     name: ${NETWORK}
 
-
-
 services:
   app:
     build:
@@ -76,6 +74,7 @@ services:
       - ./src:/var/www/html
     depends_on:
       - php
+    working_dir: /var/www/html/${BRANCH}
     entrypoint: [ 'composer', '--ignore-platform-reqs' ]
     networks:
       - mynetwork
@@ -89,7 +88,7 @@ services:
       - "${NPM_PORT_1:-3000}:3000"
       - "${NPM_PORT_2:-3001}:3001"
       - "${NPM_PORT_3:-5173}:5173"
-    working_dir: /var/www/html
+    working_dir: /var/www/html/${BRANCH}
     entrypoint: [ 'npm' ]
     networks:
       - mynetwork
