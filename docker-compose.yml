@@ -1,42 +1,119 @@
 networks:
-  wordlust:
+  ${NETWORK}:
+
 
 services:
-  site:
+  app:
     build:
-      context: .
+      context: ./dockerfiles
       dockerfile: nginx.dockerfile
-    container_name: ${PROJECT}_nginx
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
     ports:
-      - 9007:443
+      - "${WEB_PORT:-80}:80"
+      - "${WEBS_PORT:-443}:443"
     volumes:
       - ./src:/var/www/html:delegated
     depends_on:
       - php
       - redis
       - mysql
-      - mailhog
+      - mailpit
     networks:
-      - wordlust
+      - ${NETWORK}
 
   mysql:
     image: mysql:latest
-    container_name: ${PROJECT}_mysql
     restart: unless-stopped
     tty: true
     ports:
-      - 3307:3306
+      - "${MYSQL_PORT:-3306}:3306"
     environment:
-      MYSQL_DATABASE: wordlust
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-laravel}
+      MYSQL_USER: ${MYSQL_USER:-laravel}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     volumes:
-      - apnithali_db:/var/lib/mysql
+      - ./mysql:/var/lib/mysql
     networks:
-      - wordlust
+      - ${NETWORK}
+
+  php:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    ports:
+      - "${PHP_PORT:-9000}:9000"
+    volumes:
+      - ./src:/var/www/html:delegated
+    networks:
+      - ${NETWORK}
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - ${NETWORK}
+
+  composer:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - php
+    entrypoint: [ 'composer', '--ignore-platform-reqs' ]
+    networks:
+      - ${NETWORK}
+
+  npm:
+    image: node:current-alpine
+    volumes:
+      - ./src:/var/www/html
+    user: ${UID}
+    ports:
+      - "${NPM_PORT_1:-3000}:3000"
+      - "${NPM_PORT_2:-3001}:3001"
+      - "${NPM_PORT_3:-5173}:5173"
+    working_dir: /var/www/html
+    entrypoint: [ 'npm' ]
+    networks:
+      - ${NETWORK}
+
+  artisan:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    volumes:
+      - ./src:/var/www/html:delegated
+    depends_on:
+      - mysql
+    entrypoint: [ 'php', '/var/www/html/artisan' ]
+    networks:
+      - ${NETWORK}
+
+  mailpit:
+    image: 'axllent/mailpit:latest'
+    ports:
+      - "${MAILPIT_PORT_1:-1089}:1025"
+      - "${MAILPIT_PORT_2:-8089}:8025"
+    networks:
+      - ${NETWORK}
 
   phpmyadmin:
     depends_on:
@@ -44,84 +121,9 @@ services:
     image: phpmyadmin/phpmyadmin
     restart: always
     ports:
-      - 8087:80
+      - 8912:80
     environment:
       PMA_HOST: mysql
       MYSQL_ROOT_PASSWORD: secret
     networks:
-      - wordlust
-
-
-  php:
-    build:
-      context: .
-      dockerfile: php.dockerfile
-    container_name: ${PROJECT}_php
-    volumes:
-      - ./src:/var/www/html:delegated
-    networks:
-      - wordlust
-
-  redis:
-    image: redis:alpine
-    container_name: ${PROJECT}_redis
-    restart: unless-stopped
-    ports:
-      - 6377:6379
-    networks:
-      - wordlust
-
-  composer:
-    build:
-      context: .
-      dockerfile: php.dockerfile
-    container_name: ${PROJECT}_composer
-    volumes:
-      - ./src:/var/www/html
-    working_dir: /var/www/html/${BRANCH}
-    depends_on:
-      - php
-    user: laravel
-    entrypoint: ['php', '/var/www/html/$BRANCH/composer']
-    networks:
-      - wordlust
-
-  npm:
-    build:
-      context: .
-      dockerfile: node.dockerfile
-    container_name: ${PROJECT}_npm
-    volumes:
-      - ./src:/var/www/html
-    working_dir: /var/www/html/${BRANCH}
-    entrypoint: ['npm']
-    user: node
-    networks:
-      - wordlust
-
-  artisan:
-    build:
-      context: .
-      dockerfile: php.dockerfile
-    container_name: ${PROJECT}_artisan
-    volumes:
-      - ./src:/var/www/html:delegated
-    depends_on:
-      - mysql
-    working_dir: /var/www/html/${BRANCH}
-    user: laravel
-    entrypoint: ['php', '/var/www/html/$BRANCH/artisan']
-    networks:
-      - wordlust
-
-  mailhog:
-    image: mailhog/mailhog:latest
-    container_name: ${PROJECT}_mailhog
-    ports:
-      - 1027:1025
-      - 8027:8025
-    networks:
-      - wordlust
-
-volumes:
-  wordlust_db:
+      - apnithalicrm
