@@ -2,6 +2,6 @@ mysql
 .DS_Store
 .idea
 /src
-/ssl/*.pem
+/dockerfiles/ssl/*.pem
 .env
 /tags
