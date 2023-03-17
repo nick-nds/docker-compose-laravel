@@ -1,5 +1,7 @@
 networks:
-  ${NETWORK}:
+  mynetwork:
+    external: true
+    name: ${NETWORK}
 
 
 
@@ -22,7 +24,7 @@ services:
       - mysql
       - mailpit
     networks:
-      - ${NETWORK}
+      - mynetwork
 
   mysql:
     image: mysql:latest
@@ -40,7 +42,7 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
     networks:
-      - ${NETWORK}
+      - mynetwork
 
   php:
     build:
@@ -54,7 +56,7 @@ services:
     volumes:
       - ./src:/var/www/html:delegated
     networks:
-      - ${NETWORK}
+      - mynetwork
 
   redis:
     image: redis:alpine
@@ -62,7 +64,7 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:6379"
     networks:
-      - ${NETWORK}
+      - mynetwork
 
   composer:
     build:
@@ -77,7 +79,7 @@ services:
       - php
     entrypoint: [ 'composer', '--ignore-platform-reqs' ]
     networks:
-      - ${NETWORK}
+      - mynetwork
 
   npm:
     image: node:current-alpine
@@ -91,7 +93,7 @@ services:
     working_dir: /var/www/html
     entrypoint: [ 'npm' ]
     networks:
-      - ${NETWORK}
+      - mynetwork
 
   artisan:
     build:
@@ -106,7 +108,7 @@ services:
       - mysql
     entrypoint: [ 'php', '/var/www/html/artisan' ]
     networks:
-      - ${NETWORK}
+      - mynetwork
 
   mailpit:
     image: 'axllent/mailpit:latest'
@@ -114,7 +116,7 @@ services:
       - "${MAILPIT_PORT_1:-1089}:1025"
       - "${MAILPIT_PORT_2:-8089}:8025"
     networks:
-      - ${NETWORK}
+      - mynetwork
 
   phpmyadmin:
     depends_on:
@@ -127,4 +129,4 @@ services:
       PMA_HOST: mysql
       MYSQL_ROOT_PASSWORD: secret
     networks:
-      - ${NETWORK}
+      - mynetwork
