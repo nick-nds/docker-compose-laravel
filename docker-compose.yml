@@ -119,7 +119,7 @@ services:
   phpmyadmin:
     depends_on:
       - mysql
-    image: phpmyadmin/phpmyadmin
+    image: 'phpmyadmin:latest'
     restart: always
     ports:
       - "${PHPMYADMIN_PORT:-8081}:80"
