@@ -104,7 +104,7 @@ services:
       - ./src:/var/www/html:delegated
     depends_on:
       - mysql
-    entrypoint: [ 'php', '/var/www/html/artisan' ]
+    entrypoint: [ 'php', '/var/www/html/artisan/${BRANCH}' ]
     networks:
       - mynetwork
 
