@@ -128,3 +128,18 @@ services:
       MYSQL_ROOT_PASSWORD: secret
     networks:
       - mynetwork
+
+  phpunit:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    volumes:
+      - ./src:/var/www/html:delegated
+    depends_on:
+      - mysql
+    entrypoint: [ 'php', '/var/www/html/${BRANCH}/vendor/bin/phpunit' ]
+    networks:
+      - mynetwork
