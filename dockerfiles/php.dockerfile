@@ -1,4 +1,4 @@
-FROM php:8.2-fpm-alpine3.16
+FROM php:8.2.12RC1-fpm-alpine3.18
 
 ARG UID
 ARG GID
@@ -27,6 +27,24 @@ ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/do
 
 RUN chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions pdo pdo_mysql intl opcache gd exif
+
+
+RUN pear upgrade
+RUN pecl upgrade
+
+# Add xdebug
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS
+RUN apk add --update linux-headers
+RUN pecl install xdebug
+RUN docker-php-ext-enable xdebug
+RUN apk del -f .build-deps
+# 
+# # Configure Xdebug
+RUN echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.log=/var/www/html/xdebug/xdebug.log" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.discover_client_host=1" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.client_port=9000" >> /usr/local/etc/php/conf.d/xdebug.ini
     
 USER laravel
 
