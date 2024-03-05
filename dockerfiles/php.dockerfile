@@ -1,4 +1,4 @@
-FROM php:8.2.12RC1-fpm-alpine3.18
+FROM php:8.2.2-fpm-alpine3.17
 
 ARG UID
 ARG GID
@@ -29,7 +29,7 @@ RUN chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions pdo pdo_mysql intl opcache gd exif
 
 
-RUN pear upgrade
+RUN pear upgrade --force
 RUN pecl upgrade
 
 # Add xdebug
@@ -38,14 +38,23 @@ RUN apk add --update linux-headers
 RUN pecl install xdebug
 RUN docker-php-ext-enable xdebug
 RUN apk del -f .build-deps
+
+RUN mkdir -p /var/log/xdebug
+RUN touch /var/log/xdebug/xdebug.log
+RUN chown -R laravel:laravel /var/log/xdebug
+RUN chmod -R 777 /var/log/xdebug
+RUN REMOTE_HOST=$(netstat -nr | grep '^0\.0\.0\.0' | awk '{print $2}')
+
 # 
 # # Configure Xdebug
 RUN echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.log=/var/www/html/xdebug/xdebug.log" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.discover_client_host=1" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.client_port=9000" >> /usr/local/etc/php/conf.d/xdebug.ini
-    
+    && echo "xdebug.log=/var/log/xdebug/xdebug.log" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.discover_client_host=true" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.client_port=9003" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.client_host=$(netstat -nr | grep '^0\.0\.0\.0' | awk '{print $2}')" >> /usr/local/etc/php/conf.d/xdebug.ini
+    # && echo "xdebug.remote_host=host.docker.internal" >> /usr/local/etc/php/conf.d/xdebug.ini
+
 USER laravel
 
 CMD ["php-fpm", "-y", "/usr/local/etc/php-fpm.conf", "-R"]

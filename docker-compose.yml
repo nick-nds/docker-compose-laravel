@@ -50,6 +50,8 @@ services:
         - GID=${GID:-1000}
     ports:
       - "${PHP_PORT:-9000}:9000"
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     volumes:
       - ./src:/var/www/html:delegated
     networks:
